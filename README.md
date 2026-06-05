@@ -4,7 +4,7 @@
 
 # KI-Register Agent Kit
 
-Documentation-first tooling for AI applications, processes and workflows that need to stay understandable for operators, usable by coding agents, and defensible under EU AI Act-style governance.
+Documentation-first tooling for AI applications, processes and workflows that need to stay understandable for operators, usable by coding agents, and defensible under EU AI Act-oriented governance.
 
 > This kit is built to support compliance work, engineering handoffs and internal review. It is not legal advice and does not replace a formal conformity or legal assessment.
 
@@ -39,7 +39,7 @@ This repository turns those ideas into a practical operating standard:
 | Component | Purpose | Why it matters |
 | --- | --- | --- |
 | `bin/studio-agent.mjs` | Standalone Node CLI | Works locally, in CI, and in agent runtimes without framework lock-in |
-| `skills/studio-use-case-documenter/` | Portable skill folder | Easy to publish to skill marketplaces and reuse in Codex-style systems |
+| `skills/ki-register-use-case-documenter/` | Portable skill folder | Easy to publish to skill marketplaces and reuse in Codex, Claude Code, OpenClaw and other skills-compatible systems |
 | `schemas/studio-use-case.schema.json` | Canonical manifest contract | Makes documentation machine-readable and validation-friendly |
 | `examples/sample-use-case.json` | Starter payload | Good for automation, testing and onboarding |
 | `examples/slash-command.md` | Generic slash-command pattern | Helpful for agents that support custom command aliases |
@@ -72,32 +72,51 @@ docs/agent-workflows/<slug>/
   manifest.json
 ```
 
+Optional global install from GitHub:
+
+```bash
+npm install -g git+https://github.com/Egonso/ki-register-agent-kit.git
+studio-agent onboard
+```
+
 ## Direct submission to KI-Register
 
-Once the team has created a personal Agent Kit API key for either `Mein Register` or a workspace scope, the CLI can submit a confirmed `manifest.json` directly into KI-Register so the team lead sees a real use case on the website.
+Once the team has created a scoped Agent Kit API key for either `Mein Register` or a workspace scope, the CLI can submit a confirmed `manifest.json` directly into KI-Register so the team lead sees a real use case on the website.
+
+<p align="center">
+  <img src="./assets/direct-submit-flow.svg" alt="Direct submission flow from agent workflow to KI-Register" width="100%" />
+</p>
 
 Direct path:
 
 1. Choose the target scope: personal register or workspace.
-2. Create one personal API key for that scope.
+2. Create one scoped Agent Kit API key for that scope.
 3. Confirm the generated `manifest.json`.
 4. Submit it to KI-Register with `studio-agent submit`.
 5. Review the real use case card on the website.
 
 ### One-time workspace setup
 
-Use the signed-in control area to create a personal API key and choose the target register.
+Use the signed-in control area to create a scoped API key and choose the target register.
+
+<p align="center">
+  <img src="./assets/workspace-api-keys.svg" alt="Workspace API key panel" width="100%" />
+</p>
 
 ### Submit command
 
 ```bash
-export KI_REGISTER_API_KEY="akv1.<workspaceId>.<keyId>.<secret>"
+export KI_REGISTER_API_KEY="akv1.<scopeId>.<keyId>.<secret>"
 export KI_REGISTER_REGISTER_ID="reg_123"
 
 node ./bin/studio-agent.mjs submit \
   ./docs/agent-workflows/<slug>/manifest.json \
   --endpoint "https://kiregister.com/api/agent-kit/submit"
 ```
+
+`scopeId` is the selected target scope: your own user id for `Mein Register` or the workspace id for a workspace scope.
+
+If you do not have an account or key yet, open [the Agent Kit API docs](https://kiregister.com/developers/agent-kit) or [the signed-in key page](https://kiregister.com/settings/agent-kit). The website guides you through sign-in, account creation, register selection and scoped API-key creation.
 
 ### What this means for non-technical teams
 
@@ -180,6 +199,22 @@ Recommended behavior:
 - ask only for missing required fields
 - require final confirmation before writing files
 
+## Skill marketplace usage
+
+The portable skill entrypoint is:
+
+```text
+skills/ki-register-use-case-documenter/SKILL.md
+```
+
+For skill-based agents, install or copy the `skills/ki-register-use-case-documenter/` folder and make the full Agent Kit repository available so the skill can call `bin/studio-agent.mjs`, read `schemas/studio-use-case.schema.json`, and use the direct-submission guide.
+
+Suggested prompt:
+
+```text
+Use $ki-register-use-case-documenter to inspect this repository or interview me, document the AI use case in KI-Register format, validate the manifest, show me the summary, and submit it to KI-Register after I confirm.
+```
+
 ## Distribution
 
 This package is intentionally shaped so it can be:
@@ -188,6 +223,7 @@ This package is intentionally shaped so it can be:
 - published as a standalone GitHub repository
 - zipped for an in-product download page
 - submitted to skill marketplaces as a CLI + skill bundle
+- discovered by SkillsMP-style directories that index public GitHub `SKILL.md` files
 
 For marketplace or public GitHub publication, the minimum clean package is:
 
@@ -204,6 +240,8 @@ ki-register-agent-kit/
 ```
 
 This standalone repository uses `https://github.com/Egonso/ki-register-agent-kit`.
+
+Marketplace-ready listing text, tags and submission metadata live in [`marketplaces/`](./marketplaces/).
 
 ## Open-source health
 
